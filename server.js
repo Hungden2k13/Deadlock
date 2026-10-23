@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -6,6 +5,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Database = require('better-sqlite3');
+const path = require('path'); // THÊM DÒNG NÀY
 
 const app = express();
 app.use(cors());
@@ -55,14 +55,12 @@ app.post('/api/login', async (req, res) => {
 
 // --- SOCKET.IO MULTIPLAYER ---
 const players = {};
-
-// Xác thực người chơi qua Token trước khi vào game
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) return next(new Error('Unauthorized'));
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        socket.user = decoded; // Lưu thông tin user vào socket
+        socket.user = decoded;
         next();
     } catch (err) {
         next(new Error('Unauthorized'));
@@ -70,13 +68,10 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-    console.log(`[DEADLOCK] Người chơi kết nối: ${socket.user.displayName} (${socket.id})`);
-
+    console.log(`[DEADLOCK] Người chơi kết nối: ${socket.user.displayName}`);
     players[socket.id] = { 
-        id: socket.id, 
-        name: socket.user.displayName, // Lấy tên hiển thị từ DB
-        x: 0, y: 0, z: 0, 
-        yaw: 0, pitch: 0,
+        id: socket.id, name: socket.user.displayName,
+        x: 0, y: 0, z: 0, yaw: 0, pitch: 0,
         crouch: false, sprint: false, alive: true,
         team: Math.floor(Math.random() * 2) 
     };
@@ -86,14 +81,7 @@ io.on("connection", (socket) => {
 
     socket.on("playerMovement", (data) => {
         if (players[socket.id]) {
-            players[socket.id].x = data.x;
-            players[socket.id].y = data.y;
-            players[socket.id].z = data.z;
-            players[socket.id].yaw = data.yaw;
-            players[socket.id].pitch = data.pitch;
-            players[socket.id].crouch = data.crouch;
-            players[socket.id].sprint = data.sprint;
-            players[socket.id].alive = data.alive;
+            Object.assign(players[socket.id], data);
             socket.broadcast.emit("playerMoved", players[socket.id]);
         }
     });
@@ -103,15 +91,21 @@ io.on("connection", (socket) => {
     });
 
     socket.on("disconnect", () => {
-        console.log("Người chơi thoát:", socket.id);
         delete players[socket.id];
         io.emit("playerDisconnected", socket.id);
     });
 });
 
-const PORT = 3000;
+// --- PHỤC VỤ GIAO DIỆN GAME (FRONTEND) ---
+// Trỏ tới thư mục 'dist' (nơi chứa code đã build của Vite)
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Bất kỳ request nào không phải API hay Socket sẽ trả về file index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`\n=========================================`);
-    console.log(`[SERVER] DEADLOCK Backend đang chạy tại cổng ${PORT}`);
-    console.log(`=========================================\n`);
+    console.log(`[SERVER] DEADLOCK đang chạy tại cổng ${PORT}`);
 });
