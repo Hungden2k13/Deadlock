@@ -27,52 +27,60 @@ export class Auth {
                 <div id="form-login">
                     <input type="text" id="login-user" placeholder="Tên đăng nhập" style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; outline: none;">
                     <input type="password" id="login-pass" placeholder="Mật khẩu" style="width: 100%; padding: 12px; margin-bottom: 20px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; outline: none;">
-                    <button id="btn-login" style="width: 100%; padding: 15px; background: #00ffcc; color: #000; font-weight: bold; font-size: 18px; border: none; border-radius: 4px; cursor: pointer;">VÀO GAME</button>
+                    <button id="btn-login" style="width: 100%; padding: 15px; background: #00ffcc; color: #000; font-weight: bold; font-size: 18px; border: none; border-radius: 4px; cursor: pointer; pointer-events: auto;">VÀO GAME</button>
                 </div>
 
                 <div id="form-register" style="display: none;">
                     <input type="text" id="reg-user" placeholder="Tên đăng nhập" style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; outline: none;">
                     <input type="text" id="reg-name" placeholder="Tên hiển thị trong game" style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; outline: none;">
                     <input type="password" id="reg-pass" placeholder="Mật khẩu" style="width: 100%; padding: 12px; margin-bottom: 20px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; outline: none;">
-                    <button id="btn-register" style="width: 100%; padding: 15px; background: #ff4444; color: #fff; font-weight: bold; font-size: 18px; border: none; border-radius: 4px; cursor: pointer;">TẠO TÀI KHOẢN</button>
+                    <button id="btn-register" style="width: 100%; padding: 15px; background: #ff4444; color: #fff; font-weight: bold; font-size: 18px; border: none; border-radius: 4px; cursor: pointer; pointer-events: auto;">TẠO TÀI KHOẢN</button>
                 </div>
                 
                 <div id="auth-error" style="color: #ff4444; margin-top: 15px; text-align: center; font-weight: bold; display: none;"></div>
             </div>
         `;
 
-        // Xử lý chuyển tab
         const tabLogin = this.el.querySelector('#tab-login');
         const tabReg = this.el.querySelector('#tab-register');
         const formLogin = this.el.querySelector('#form-login');
         const formReg = this.el.querySelector('#form-register');
+        const errDiv = this.el.querySelector('#auth-error');
 
         tabLogin.onclick = () => {
             tabLogin.style.color = '#00ffcc'; tabReg.style.color = '#666';
             formLogin.style.display = 'block'; formReg.style.display = 'none';
+            errDiv.style.display = 'none';
         };
         tabReg.onclick = () => {
             tabReg.style.color = '#ff4444'; tabLogin.style.color = '#666';
             formReg.style.display = 'block'; formLogin.style.display = 'none';
+            errDiv.style.display = 'none';
         };
 
-        // Xử lý API
         const showError = (msg) => {
-            const err = this.el.querySelector('#auth-error');
-            err.textContent = msg;
-            err.style.display = 'block';
+            errDiv.textContent = msg;
+            errDiv.style.display = 'block';
         };
 
+        // ĐÃ SỬA: Dùng đường dẫn tương đối '/api/...' để tự động khớp với domain hiện tại
         this.el.querySelector('#btn-login').onclick = async () => {
             const u = this.el.querySelector('#login-user').value;
             const p = this.el.querySelector('#login-pass').value;
-            const res = await fetch('http://localhost:3000/api/login', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: u, password: p })
-            });
-            const data = await res.json();
-            if (data.success) this.loginSuccess(data);
-            else showError(data.error);
+            if (!u || !p) return showError('Vui lòng nhập đủ tên và mật khẩu!');
+            
+            try {
+                errDiv.style.display = 'none';
+                const res = await fetch('/api/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await res.json();
+                if (data.success) this.loginSuccess(data);
+                else showError(data.error || 'Đăng nhập thất bại!');
+            } catch (err) {
+                showError('Lỗi kết nối Server: ' + err.message);
+            }
         };
 
         this.el.querySelector('#btn-register').onclick = async () => {
@@ -80,13 +88,19 @@ export class Auth {
             const n = this.el.querySelector('#reg-name').value;
             const p = this.el.querySelector('#reg-pass').value;
             if (!u || !n || !p) return showError('Vui lòng điền đủ thông tin!');
-            const res = await fetch('http://localhost:3000/api/register', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: u, displayName: n, password: p })
-            });
-            const data = await res.json();
-            if (data.success) this.loginSuccess(data);
-            else showError(data.error);
+            
+            try {
+                errDiv.style.display = 'none';
+                const res = await fetch('/api/register', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, displayName: n, password: p })
+                });
+                const data = await res.json();
+                if (data.success) this.loginSuccess(data);
+                else showError(data.error || 'Đăng ký thất bại!');
+            } catch (err) {
+                showError('Lỗi kết nối Server: ' + err.message);
+            }
         };
     }
 
