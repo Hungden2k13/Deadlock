@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 const BASE = './assets/';
 
@@ -13,7 +13,7 @@ export class Assets {
     this.gltf = new GLTFLoader(this.manager);
     this.gltf.setMeshoptDecoder(MeshoptDecoder); // EXT_meshopt_compression (perf: ~3x smaller geometry)
     this.tex = new THREE.TextureLoader(this.manager);
-    this.hdr = new HDRLoader(this.manager);
+    this.hdr = new RGBELoader(this.manager);
     this.models = {};
     this.textures = {};
     this.materialsets = {};

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MeshoptSimplifier } from 'three/addons/libs/meshopt_simplifier.module.js';
+import { MeshoptSimplifier } from 'meshoptimizer';
 import { mergeVertices, mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 /**

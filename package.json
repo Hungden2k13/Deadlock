@@ -11,19 +11,29 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.13.1",
     "@fontsource/barlow-condensed": "^5.0.0",
     "@fontsource/rajdhani": "^5.0.0",
+    "@recast-navigation/core": "^0.43.0",
+    "@recast-navigation/generators": "^0.43.0",
+    "@recast-navigation/three": "^0.43.0",
     "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^11.0.0",
+    "better-sqlite3": "^12.9.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "meshoptimizer": "^1.3.0",
+    "n8ao": "^1.9.4",
+    "postprocessing": "^6.36.0",
+    "simplex-noise": "^4.0.3",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
-    "three": "^0.160.0",
-    "vite": "^5.2.0" 
+    "stats.js": "^0.17.0",
+    "three": "^0.169.0",
+    "three-mesh-bvh": "^0.7.8",
+    "vite": "^5.2.0"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.0.0 <21.0.0"
   }
 }

@@ -1,0 +1,1 @@
+export { RGBELoader as HDRLoader } from 'three/examples/jsm/loaders/RGBELoader.js';
