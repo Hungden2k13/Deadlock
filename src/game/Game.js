@@ -150,7 +150,13 @@ export class Game {
     this.applyGraphicsFeatures(this.renderer.features);
 
     this.level.applyInteriorOcclusion();
-    this.renderer.primeShadows();
+    
+    // Bọc trong try-catch để tránh crash trên môi trường Render (khi WebGL Context chưa sẵn sàng)
+    try {
+        this.renderer.primeShadows();
+    } catch (e) {
+        console.warn("Bỏ qua tối ưu primeShadows do lỗi WebGL:", e);
+    }
     
     const R = this.renderer, rr = R.renderer;
     await Promise.all([rr.compileAsync(R.scene, R.camera), rr.compileAsync(R.viewScene, R.viewCamera)]);
@@ -193,7 +199,7 @@ export class Game {
       jobs.push(a.load('expl_crunch', `./assets/audio/explosion/explosionCrunch_00${i}.ogg`));
     }
     for (let i = 0; i < 3; i++) jobs.push(a.load('imp_metal_heavy', `./assets/audio/impacts/impact_metal_heavy_00${i}.ogg`));
-    for (let i = 0; i < 2; i++) jobs.push(a.load('expl_low', `./assets/audio/lowFrequency_explosion_00${i}.ogg`));
+    for (let i = 0; i < 2; i++) jobs.push(a.load('expl_low', `./assets/audio/explosion/lowFrequency_explosion_00${i}.ogg`));
     await Promise.all(jobs);
   }
 
