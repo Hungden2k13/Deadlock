@@ -1,18 +1,24 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const Database = require('better-sqlite3');
-const path = require('path'); // THÊM DÒNG NÀY
+// server.js
+import express from 'express';
+import { createServer } from 'node:http';
+import { Server } from 'socket.io';
+import cors from 'cors';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import Database from 'better-sqlite3';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// Khắc phục __dirname trong ES Module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const httpServer = createServer(app);
+const io = new Server(httpServer, { cors: { origin: "*" } });
 
 // Cấu hình Database
 const db = new Database('deadlock.db');
@@ -97,15 +103,13 @@ io.on("connection", (socket) => {
 });
 
 // --- PHỤC VỤ GIAO DIỆN GAME (FRONTEND) ---
-// Trỏ tới thư mục 'dist' (nơi chứa code đã build của Vite)
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Bất kỳ request nào không phải API hay Socket sẽ trả về file index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(`[SERVER] DEADLOCK đang chạy tại cổng ${PORT}`);
 });
